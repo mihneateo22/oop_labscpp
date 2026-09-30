@@ -109,7 +109,7 @@ double totalRain(Station *s) {
 Reading *findByDate(Station *s, char *date) {
     int i;
     for (i = 0; i < s->count; i++)
-        if (s->readings[i].date == date) return &s->readings[i];
+        if (strcmp(s->readings[i].date, date) == 0) return &s->readings[i];
     return NULL;
 }
 
@@ -176,6 +176,12 @@ int main(void) {
     Station station, sorted;
     FILE *in = fopen("01.in", "r");
     FILE *out = fopen("01.out", "w");
+
+    if (in == NULL || out == NULL) 
+    {
+         printf("Eroare la deschiderea fisierelor\n"); 
+            return 1; 
+    }
 
     while (!feof(in)) {
         readHeader(in, name, &count);
