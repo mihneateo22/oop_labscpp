@@ -1,1 +1,1 @@
-#LABURI POO
+# OOP LABS
