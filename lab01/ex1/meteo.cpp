@@ -5,20 +5,20 @@
 // ================= Structuri de date ================= 
 
 // Structura de date care retine informatiile citite de la senzor
-struct Reading {
+typedef struct Reading {
     char date[11]; // data calendaristica, in format yyyy-mm-dd
     double tmax;   // temperatura maxima inregistrata in acea zi
     double tmin;   // temperatura minima inregistrata in acea zi
     double rain;   // cantitatea de precipitatii din  acea zi
-};
+}Reading;
 
 // Structura de date care retine toate masuratorile de la o statie meteo
-struct Station {
-    char city[8];       // numele statiei
+typedef struct Station {
+    char city[50];       // numele statiei
     Reading *readings;  // tablou cu masuratorile inregistrate la statie
     int count;          // numarul curent de masuratori din tablou
     int capacity;       // capacitatea totala (spatiu alocat) a tabloului
-};
+}Station;
 
 // ============ Crearea, copierea si distrugerea unei statii ============
 
@@ -34,13 +34,18 @@ Station createStation(char *city, int capacity) {
 Station copyStation(Station *other) {
     Station copy = createStation(other->city, other->capacity);
     int i;
-    for (i = 0; i < other->count; i++) copy.readings[i] = other->readings[i];
-    copy.count = other->count;
+    for (i = 0; i < other->count; i++) 
+    {
+        copy.readings[i] = other->readings[i];
+        copy.count = other->count;
+    }
     return copy;
 }
 
 void destroyStation(Station *station) {
     free(station->readings);
+    station->readings = NULL;
+    free(station);
 }
 
 void addReading(Station *station, Reading reading) {
@@ -49,7 +54,8 @@ void addReading(Station *station, Reading reading) {
 }
 
 char *describe(Reading *r) {
-    char text[64];
+    char *text;
+    text = (char*)malloc(64 * sizeof(char));
     sprintf(text, "%s: %.1f / %.1f C, %.1f mm", r->date, r->tmax, r->tmin, r->rain);
     return text;
 }
@@ -81,10 +87,10 @@ void readReadings(FILE *file, Station *station, int count) {
 // ================= Calcule =================
 
 int hottestDay(Station *s) {
-    double best = 0;
+    double best = s->readings[0].tmax;
     int bestIndex = -1;
     int i;
-    for (i = 0; i < s->count; i++) {
+    for (i = 1; i < s->count; i++) {
         if (s->readings[i].tmax > best) {
             best = s->readings[i].tmax;
             bestIndex = i;
@@ -94,7 +100,7 @@ int hottestDay(Station *s) {
 }
 
 double totalRain(Station *s) {
-    int total = 0;
+    double total = 0;
     int i;
     for (i = 0; i < s->count; i++) total += s->readings[i].rain;
     return total;
